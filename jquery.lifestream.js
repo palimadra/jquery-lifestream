@@ -1,9 +1,9 @@
 /*!
  * jQuery Lifestream Plug-in
  * Show a stream of your online activity
- * @version   0.4.2
+ * @version   0.5.1
  * @author    Christian Vuerings et al.
- * @copyright Copyright 2011, Christian Vuerings - http://denbuzze.com
+ * @copyright Copyright 2014, Christian Vuerings - http://denbuzze.com
  * @license   https://github.com/christianv/jquery-lifestream/blob/master/LICENSE MIT
  */
 /*global jQuery */
@@ -193,6 +193,55 @@
   }
 
 }( jQuery ));
+(function($) {
+$.fn.lifestream.feeds.atom = function( config, callback ) {
+
+  var template = $.extend({},
+    {
+      posted: 'posted <a href="${link.href}">${title.content}</a>'
+    },
+    config.template),
+
+  /**
+   * Parse the input from atom feed
+   */
+  parseAtom = function( input ) {
+    var output = [], list = [], i = 0, j = 0;
+    if(input.query && input.query.count && input.query.count > 0) {
+      list = input.query.results.feed.entry;
+      j = list.length;
+
+      for( ; i<j; i++) {
+        var item = list[i];
+
+        output.push({
+          url: item.link.href,
+          date: new Date( item.updated ),
+          config: config,
+          html: $.tmpl( template.posted, item )
+        });
+      }
+    }
+    return output;
+  };
+
+  $.ajax({
+    url: $.fn.lifestream.createYqlUrl('select * from xml where url="' +
+      config.user + '"'),
+    dataType: 'jsonp',
+    success: function( data ) {
+      callback(parseAtom(data));
+    }
+  });
+
+  // Expose the template.
+  // We use this to check which templates are available
+  return {
+    "template" : template
+  };
+
+};
+})(jQuery);
 (function($) {
 $.fn.lifestream.feeds.bitbucket = function( config, callback ) {
 
@@ -388,7 +437,7 @@ $.fn.lifestream.feeds.citeulike = function( config, callback ) {
         output.push({
           date: new Date(item.date),
           config: config,
-          url: 'http://www.citeulike.org/user/' + config.user,
+          url: 'https://www.citeulike.org/user/' + config.user,
           html: $.tmpl( template.saved, item )
         });
       }
@@ -397,7 +446,7 @@ $.fn.lifestream.feeds.citeulike = function( config, callback ) {
   };
 
   $.ajax({
-    url: 'http://www.citeulike.org/json/user/' + config.user,
+    url: 'https://www.citeulike.org/json/user/' + config.user,
     dataType: 'jsonp',
     success: function( data ) {
       callback(parseCiteulike(data));
@@ -411,7 +460,8 @@ $.fn.lifestream.feeds.citeulike = function( config, callback ) {
   };
 
 };
-})(jQuery);(function($) {
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.dailymotion = function( config, callback ) {
 
   var template = $.extend({},
@@ -468,7 +518,7 @@ $.fn.lifestream.feeds.delicious = function( config, callback ) {
     config.template);
 
   $.ajax({
-    url: "http://feeds.delicious.com/v2/json/" + config.user,
+    url: "https://feeds.delicious.com/v2/json/" + config.user,
     dataType: "jsonp",
     success: function( data ) {
       var output = [], i = 0, j;
@@ -494,7 +544,8 @@ $.fn.lifestream.feeds.delicious = function( config, callback ) {
   };
 
 };
-})(jQuery);(function($) {
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.deviantart = function( config, callback ) {
 
   var template = $.extend({},
@@ -611,7 +662,7 @@ $.fn.lifestream.feeds.dribbble = function( config, callback ) {
       config.template);
 
     $.ajax({
-      url: "http://api.dribbble.com/players/" + config.user + "/shots",
+      url: "https://api.dribbble.com/players/" + config.user + "/shots",
       dataType: "jsonp",
       success: function( data ) {
         var output = [], i = 0, j;
@@ -639,7 +690,8 @@ $.fn.lifestream.feeds.dribbble = function( config, callback ) {
     };
 
   };
-  })(jQuery);(function($) {
+  })(jQuery);
+(function($) {
 $.fn.lifestream.feeds.facebook_page = function( config, callback ) {
 
   var template = $.extend({},
@@ -745,7 +797,7 @@ $.fn.lifestream.feeds.flickr = function( config, callback ) {
     config.template);
 
   $.ajax({
-    url: "http://api.flickr.com/services/feeds/photos_public.gne?id=" +
+    url: "https://api.flickr.com/services/feeds/photos_public.gne?id=" +
       config.user + "&lang=en-us&format=json",
     dataType: "jsonp",
     jsonp: 'jsoncallback',
@@ -775,7 +827,8 @@ $.fn.lifestream.feeds.flickr = function( config, callback ) {
   };
 
 };
-})(jQuery);(function($) {
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.foomark = function( config, callback ) {
 
   var template = $.extend({},
@@ -873,7 +926,7 @@ $.fn.lifestream.feeds.forrst = function( config, callback ) {
     config.template);
 
   $.ajax({
-    url: "http://forrst.com/api/v2/users/posts?username=" + config.user,
+    url: "https://forrst.com/api/v2/users/posts?username=" + config.user,
     dataType: "jsonp",
     success: function(  data  ) {
       var output = [], i=0, j;
@@ -899,7 +952,8 @@ $.fn.lifestream.feeds.forrst = function( config, callback ) {
   };
 
 };
-})(jQuery);(function($) {
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.foursquare = function( config, callback ) {
 
   var template = $.extend({},
@@ -1440,7 +1494,7 @@ $.fn.lifestream.feeds.librarything = function( config, callback ) {
   };
 
   $.ajax({
-    url: 'http://www.librarything.com/api_getdata.php?booksort=entry_REV&userid=' + config.user,
+    url: 'https://www.librarything.com/api_getdata.php?booksort=entry_REV&userid=' + config.user,
     dataType: 'jsonp',
     success: function( data ) {
       callback(parseLibraryThing(data));
@@ -1917,7 +1971,7 @@ $.fn.lifestream.feeds.reddit = function( config, callback ) {
   };
 
   $.ajax({
-    url: "http://www.reddit.com/user/" + config.user + ".json",
+    url: "https://pay.reddit.com/user/" + config.user + ".json",
     dataType: "jsonp",
     jsonp:"jsonp",
     success: function( data ) {
@@ -2118,23 +2172,13 @@ $.fn.lifestream.feeds.stackoverflow = function( config, callback ) {
     question_link = "http://stackoverflow.com/questions/";
 
     if(item.timeline_type === "badge") {
-      text = "was " + item.action + " the '" + item.description + "' badge";
-      title = item.detail;
       link = stackoverflow_link + "?tab=reputation";
     }
-    else if (item.timeline_type === "comment") {
-       text = "commented on";
-       title = item.description;
-       link = question_link + item.post_id;
-    }
-    else if (item.timeline_type === "revision" ||
-        item.timeline_type === "accepted" ||
-        item.timeline_type === "askoranswered") {
-      text = (item.timeline_type === 'askoranswered' ?
-             item.action : item.action + ' ' + item.post_type);
-      title = item.detail || item.description || "";
-      link = question_link + item.post_id;
-    }
+
+    text = item.timeline_type;
+    title = item.title || item.detail || "";
+    link = link || question_link + item.post_id;
+
     return {
       link: link,
       title: title,
@@ -2146,17 +2190,16 @@ $.fn.lifestream.feeds.stackoverflow = function( config, callback ) {
   };
 
   $.ajax({
-    url: "http://api.stackoverflow.com/1.1/users/" + config.user +
-      "/timeline?jsonp",
+    url: "https://api.stackexchange.com/2.1/users/" + config.user +
+      "/timeline?site=stackoverflow",
     dataType: "jsonp",
     jsonp: 'jsonp',
     success: function( data ) {
-      var output = [], i = 0, j;
+      var output = [];
 
-      if(data && data.total && data.total > 0 && data.user_timelines) {
-        j = data.user_timelines.length;
-        for( ; i<j; i++) {
-          var item = data.user_timelines[i];
+      if(data && data.items) {
+        for(var i = 0 ; i < data.items.length; i++) {
+          var item = data.items[i];
           output.push({
             date: convertDate(item.creation_date),
             config: config,
@@ -2176,7 +2219,8 @@ $.fn.lifestream.feeds.stackoverflow = function( config, callback ) {
   };
 
 };
-})(jQuery);(function($) {
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.tumblr = function( config, callback ) {
 
   var template = $.extend({},
@@ -2318,14 +2362,12 @@ $.fn.lifestream.feeds.tumblr = function( config, callback ) {
 })(jQuery);(function($) {
   "use strict";
 
-  $.fn.lifestream.feeds.twitter = function( config, callback ) {
+  $.fn.lifestream.feeds.twitter = function(config, callback) {
     var template = $.extend({},
       {
         "posted": '{{html tweet}}'
       },
-      config.template),
-    jsonpCallbackName = 'jlsTwitterCallback' +
-      config.user.replace(/[^a-zA-Z0-9]+/g, ''),
+      config.template);
 
     /**
      * Add links to the twitter feed.
@@ -2334,11 +2376,11 @@ $.fn.lifestream.feeds.tumblr = function( config, callback ) {
      * @param {String} tweet A string of a tweet
      * @return {String} A linkified tweet
      */
-    linkify = function( tweet ) {
+    var linkify = function( tweet ) {
 
       var link = function( t ) {
         return t.replace(
-          /[a-z]+:\/\/[a-z0-9\-_]+\.[a-z0-9\-_:~%&\?\/.=]+[^:\.,\)\s*$]/ig,
+          /([a-z]+:\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig,
           function( m ) {
             return '<a href="' + m + '">' +
               ( ( m.length > 25 ) ? m.substr( 0, 24 ) + '...' : m ) +
@@ -2359,7 +2401,7 @@ $.fn.lifestream.feeds.tumblr = function( config, callback ) {
         return t.replace(
           /(^|[^\w'"]+)\#([a-zA-Z0-9ÅåÄäÖöØøÆæÉéÈèÜüÊêÛûÎî_]+)/g,
           function( m, m1, m2 ) {
-            return m1 + '<a href="http://www.twitter.com/search?q=%23' +
+            return m1 + '<a href="http://search.twitter.com/search?q=%23' +
             m2 + '">#' + m2 + '</a>';
           }
         );
@@ -2374,51 +2416,34 @@ $.fn.lifestream.feeds.tumblr = function( config, callback ) {
      * @param  {Object[]} items
      * @return {Object[]} Array of Twitter status messages.
      */
-    parseTwitter = function( items ) {
-      var output = [], i = 0, j = items.length;
+    parseTwitter = function(response) {
+      var output = [];
 
-      for( i; i < j; i++ ) {
-        var status = items[i];
+      if (!response.tweets) {
+        return output;
+      }
+
+      for(var i = 0; i < response.tweets.length; i++ ) {
+        var status = response.tweets[i];
 
         output.push({
-          "date": new Date(status.created_at * 1000), // unix time
+          "date": new Date(status.createdAt * 1000), // unix time
           "config": config,
           "html": $.tmpl( template.posted, {
-            "tweet": linkify(status.text),
+            "tweet": linkify($('<div/>').html(status.text).text()),
             "complete_url": 'http://twitter.com/' + config.user +
-              "/status/" + status.id_str
+              "/status/" + status.id
           } ),
           "url": 'http://twitter.com/' + config.user
         });
       }
-
-      return output;
-    };
-
-    /**
-     * Global JSONP callback
-     * This should allow for better response caching by YQL.
-     * @param  {Object[]} data YQL response items
-     * @return {undefined}
-     */
-    window[jsonpCallbackName] = function(data) {
-      if ( data.query && data.query.count > 0 ) {
-        callback(parseTwitter(data.query.results.items));
-      }
+      callback(output);
     };
 
     $.ajax({
-      "url": $.fn.lifestream.createYqlUrl('USE ' +
-        '"http://arminrosu.github.io/twitter-open-data-table/table.xml" ' +
-        'AS twitter; SELECT * FROM twitter WHERE screen_name = "' +
-        config.user + '"'),
-      "cache": true,
-      'data': {
-        '_maxage': 300 // cache for 5 minutes
-      },
-      "dataType": 'jsonp',
-      "jsonpCallback": jsonpCallbackName // better caching
-    });
+      "url": 'https://twittery.herokuapp.com/' + config.user,
+      "cache": false
+    }).success(parseTwitter);
 
     // Expose the template.
     // We use this to check which templates are available
@@ -2483,14 +2508,16 @@ $.fn.lifestream.feeds.vimeo = function( config, callback ) {
       var output = [];
 
       // check for likes & parse
-      if ( response.query.results.videos[0].video.length > 0 ) {
+      if ( response.query.results.videos[0] != null &&
+           response.query.results.videos[0].video.length > 0 ) {
         output = output.concat(parseVimeo(
           response.query.results.videos[0].video
         ));
       }
 
       // check for uploads & parse
-      if ( response.query.results.videos[1].video.length > 0 ) {
+      if ( response.query.results.videos[1] != null &&
+           response.query.results.videos[1].video.length > 0 ) {
         output = output.concat(
           parseVimeo(response.query.results.videos[1].video, 'posted')
         );
@@ -2519,7 +2546,7 @@ $.fn.lifestream.feeds.wikipedia = function( config, callback ) {
     config.template);
 
   $.ajax({
-    url: "http://" + language +
+    url: "https://" + language +
       ".wikipedia.org/w/api.php?action=query&ucuser=" +
       config.user + "&list=usercontribs&ucdir=older&format=json",
     dataType: "jsonp",
@@ -2556,7 +2583,8 @@ $.fn.lifestream.feeds.wikipedia = function( config, callback ) {
   };
 
 };
-})(jQuery);(function($) {
+})(jQuery);
+(function($) {
 $.fn.lifestream.feeds.wordpress = function( config, callback ) {
 
   var template = $.extend({},
@@ -2661,7 +2689,7 @@ $.fn.lifestream.feeds.youtube = function( config, callback ) {
   };
 
   $.ajax({
-    url: "http://gdata.youtube.com/feeds/api/users/" + config.user +
+    url: "https://gdata.youtube.com/feeds/api/users/" + config.user +
       "/favorites?v=2&alt=jsonc",
     dataType: 'jsonp',
     success: function( data ) {
@@ -2670,7 +2698,7 @@ $.fn.lifestream.feeds.youtube = function( config, callback ) {
   });
 
   $.ajax({
-    url: "http://gdata.youtube.com/feeds/api/users/" + config.user +
+    url: "https://gdata.youtube.com/feeds/api/users/" + config.user +
       "/uploads?v=2&alt=jsonc",
     dataType: 'jsonp',
     success: function( data ) {
